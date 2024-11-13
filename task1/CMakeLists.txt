@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(OpenGLTriangle)
+project(task1)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,10 +23,10 @@ set(HEADERS
     include/ShaderProgram.hpp
 )
 
-add_executable(OpenGLTriangle ${SOURCES} ${HEADERS})
+add_executable(task1 ${SOURCES} ${HEADERS})
 
-target_link_libraries(OpenGLTriangle glad ${OPENGL_LIBRARIES} sfml-window)
+target_link_libraries(task1 glad ${OPENGL_LIBRARIES} sfml-window)
 
 if (UNIX)
-    target_link_libraries(OpenGLTriangle dl)  # Link dynamic library loader on Linux
+    target_link_libraries(task1 dl)  # Link dynamic library loader on Linux
 endif()
