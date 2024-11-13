@@ -1,2 +1,1 @@
-# ProgramowanieGierKomputerowych
-nazwa sama mowi pzdr 600
+# ProgramowanieGierKomputerowych - Kacper Wiszniewski ISSP 
