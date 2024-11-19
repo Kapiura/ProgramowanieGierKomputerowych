@@ -1,1 +1,2 @@
-# ProgramowanieGierKomputerowych - Kacper Wiszniewski ISSP 
+# ProgramowanieGierKomputerowych
+tutaj bedzie majnkraft klepany
