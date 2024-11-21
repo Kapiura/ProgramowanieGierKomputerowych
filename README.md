@@ -1,2 +1,2 @@
 # ProgramowanieGierKomputerowych
-tutaj bedzie majnkraft klepany
+majnkrafta pisze
