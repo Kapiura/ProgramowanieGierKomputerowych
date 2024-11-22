@@ -86,38 +86,27 @@ Cube::~Cube() {
 }
 
 GLuint Cube::CreateTexture(const std::string &texturePath) {
-  // Wczytaj teksturę za pomocą SFML
   sf::Image image;
   if (!image.loadFromFile(texturePath)) {
     std::cerr << "Failed to load texture from: " << texturePath << std::endl;
     return 0;
   }
 
-  // Odwróć teksturę (OpenGL używa innego układu współrzędnych)
   image.flipVertically();
 
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-  glTexImage2D(GL_TEXTURE_2D,
-               0,       // poziom mipmap
-               GL_RGBA, // wewnętrzny format
-               image.getSize().x, image.getSize().y,
-               0,                   // border (musi być 0)
-               GL_RGBA,             // format danych obrazu
-               GL_UNSIGNED_BYTE,    // typ danych
-               image.getPixelsPtr() // wskaźnik do pikseli
-  );
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getSize().x, image.getSize().y,
+               0, GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr());
 
-  // Ustawienia tekstury
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  // Generuj mipmapy
   glGenerateMipmap(GL_TEXTURE_2D);
 
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -128,7 +117,6 @@ GLuint Cube::CreateTexture(const std::string &texturePath) {
 void Cube::Draw() const {
   glBindVertexArray(m_vao);
   glBindTexture(GL_TEXTURE_2D, m_texture);
-  glDrawArrays(GL_TRIANGLES, 0,
-               36); // 36 wierzchołków (6 ścian * 2 trójkąty * 3 wierzchołki)
+  glDrawArrays(GL_TRIANGLES, 0, 36);
   glBindVertexArray(0);
 }

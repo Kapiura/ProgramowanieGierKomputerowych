@@ -43,7 +43,7 @@ GLuint ShaderProgram::createShader(const GLchar *shaderSource,
     GLchar infoLog[512];
     glGetShaderInfoLog(shaderId, 512, nullptr, infoLog);
     std::cerr << "ERROR: Shader Compilation Failed\n" << infoLog << std::endl;
-    glDeleteShader(shaderId); // Clean up if compilation fails
+    glDeleteShader(shaderId);
     return 0;
   }
 
