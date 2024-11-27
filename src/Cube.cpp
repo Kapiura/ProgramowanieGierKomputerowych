@@ -6,38 +6,53 @@
 std::array<float, 6 * 6 * 5> Cube::s_vertices = {
     // x       y       z       u       v
     // przod
-    -0.5f, -0.5f, 0.5f, 0.25f, 1.0f, 0.5f, -0.5f, 0.5f, 0.5f, 1.0f, 0.5f, 0.5f,
-    0.5f, 0.5f, 2.0f / 3.0f, 0.5f, 0.5f, 0.5f, 0.5f, 2.0 / 3.0f, -0.5f, 0.5f,
-    0.5f, 0.25f, 2.0 / 3.0f, -0.5f, -0.5f, 0.5f, 0.25f, 1.0f,
+    -0.5f, -0.5f, 0.5f, 0.25f, 1.0f,
+    0.5f, -0.5f, 0.5f, 0.5f, 1.0f,
+    0.5f, 0.5f, 0.5f, 0.5f, 2.0f / 3.0f,
+    0.5f, 0.5f, 0.5f, 0.5f, 2.0 / 3.0f,
+    -0.5f, 0.5f, 0.5f, 0.25f, 2.0 / 3.0f,
+     -0.5f, -0.5f, 0.5f, 0.25f, 1.0f,
 
     // tyl
-    -0.5f, -0.5f, -0.5f, 0.5f, 0.0f, 0.5f, -0.5f, -0.5f, 0.25f, 0.0f, 0.5f,
-    0.5f, -0.5f, 0.25f, 1.0f / 3.0f, 0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f,
-    -0.5f, 0.5f, -0.5f, 0.25f, 1.0f / 3.0f, -0.5f, -0.5f, -0.5f, 0.25f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.25f, 1.0f,
+    0.5f, -0.5f, -0.5f, 0.5f, 1.0f,
+    0.5f, 0.5f, -0.5f, 0.5f, 2.0f / 3.0f,
+    0.5f, 0.5f, -0.5f, 0.5f, 2.0f / 3.0f,
+    -0.5f, 0.5f, -0.5f, 0.25f, 2.0f / 3.0f,
+    -0.5f, -0.5f, -0.5f, 0.25f, 1.0f,
 
     // lewo bok
-    -0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f, -0.5f, 0.5f, -0.5f, 0.25f,
-    1.0f / 3.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f / 3.0f, -0.5f, -0.5f, -0.5f,
-    0.0f, 1.0f / 3.0f, -0.5f, -0.5f, 0.5f, 0.0f, 2.0f / 3.0f, -0.5f, 0.5f, 0.5f,
-    0.25f, 2.0f / 3.0f,
+    -0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f,
+    -0.5f, 0.5f, -0.5f, 0.25f, 1.0f / 3.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f / 3.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f / 3.0f,
+    -0.5f, -0.5f, 0.5f, 0.0f, 2.0f / 3.0f,
+    -0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f,
 
     // prawo bok
-    0.5f, 0.5f, 0.5f, 0.5f, 2.0f / 3.0f, 0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f,
-    0.5f, -0.5f, -0.5f, 0.75f, 1.0f / 3.0f, 0.5f, -0.5f, -0.5f, 0.75f,
-    1.0f / 3.0f, 0.5f, -0.5f, 0.5f, 0.75f, 2.0f / 3.0f, 0.5f, 0.5f, 0.5f, 0.5f,
-    2.0f / 3.0f,
+    0.5f, 0.5f, 0.5f, 0.5f, 2.0f / 3.0f,
+    0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f,
+    0.5f, -0.5f, -0.5f, 0.75f, 1.0f / 3.0f,
+    0.5f, -0.5f, -0.5f, 0.75f, 1.0f / 3.0f,
+    0.5f, -0.5f, 0.5f, 0.75f, 2.0f / 3.0f,
+    0.5f, 0.5f, 0.5f, 0.5f, 2.0f / 3.0f,
 
     // dol
-    -0.5f, -0.5f, -0.5f, 0.75f, 2.0f / 3.0f, 0.5f, -0.5f, -0.5f, 0.75f,
-    1.0f / 3.0f, 0.5f, -0.5f, 0.5f, 1.0f, 1.0f / 3.0f, 0.5f, -0.5f, 0.5f, 1.0f,
-    1.0f / 3.0f, -0.5f, -0.5f, 0.5f, 1.0f, 2.0f / 3.0f, -0.5f, -0.5f, -0.5f,
-    0.75f, 2.0f / 3.0f,
+    -0.5f, -0.5f, -0.5f, 0.75f, 2.0f / 3.0f,
+    0.5f, -0.5f, -0.5f, 0.75f, 1.0f / 3.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 1.0f / 3.0f,
+    0.5f, -0.5f, 0.5f, 1.0f, 1.0f / 3.0f,
+    -0.5f, -0.5f, 0.5f, 1.0f, 2.0f / 3.0f,
+    -0.5f, -0.5f, -0.5f, 0.75f, 2.0f / 3.0f,
 
     // gora
-    -0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f, 0.5f, 0.5f, -0.5f, 0.5f, 2.0f / 3.0f,
-    0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f, 0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f,
-    -0.5f, 0.5f, 0.5f, 0.25f, 1.0f / 3.0f, -0.5f, 0.5f, -0.5f, 0.5f,
-    1.0f / 3.0f};
+    -0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f,
+    0.5f, 0.5f, -0.5f, 0.5f, 2.0f / 3.0f,
+    0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f,
+    0.5f, 0.5f, 0.5f, 0.25f, 2.0f / 3.0f,
+    -0.5f, 0.5f, 0.5f, 0.25f, 1.0f / 3.0f,
+    -0.5f, 0.5f, -0.5f, 0.5f, 1.0f / 3.0f
+    };
 
 Cube::Cube(Cube &&rhs) noexcept
     : m_vbo(std::exchange(rhs.m_vbo, 0)), m_vao(std::exchange(rhs.m_vao, 0)),
@@ -104,8 +119,8 @@ GLuint Cube::CreateTexture(const std::string &texturePath) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                  GL_NEAREST_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   glGenerateMipmap(GL_TEXTURE_2D);
 
