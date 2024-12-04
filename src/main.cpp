@@ -1,4 +1,5 @@
 #include "../include/Camera.hpp"
+#include "../include/Chunk.hpp"
 #include "../include/Cube.hpp"
 #include "../include/ShaderProgram.hpp"
 #include <SFML/Window.hpp>
@@ -8,7 +9,6 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
-#include <utility>
 
 int main() {
   sf::ContextSettings contextSettings;
@@ -43,10 +43,17 @@ int main() {
   }
 
   shaders.use();
-
-  Cube cube("../img/grass.jpg");
-
   shaders.setUniform("projection", camera.Projection());
+
+  // Cube cube("../img/grass.jpg");
+  CubePalette palette;
+
+  // shaders.setUniform("projection", camera.Projection());
+  PerlinNoise perlin;
+
+  const size_t chunkSize = 16;
+  Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
+  chunk.Generate(perlin);
 
   sf::Clock clock;
   sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
@@ -93,7 +100,8 @@ int main() {
     shaders.setUniform("view", camera.View());
     shaders.setUniform("projection", camera.Projection());
 
-    cube.Draw();
+    // cube.Draw();
+    chunk.Draw(shaders);
 
     window.display();
   }

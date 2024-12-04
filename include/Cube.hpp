@@ -6,7 +6,12 @@
 
 class Cube {
 public:
+  enum class Type { None, Grass, Stone, Grass_debug };
+
   Cube(const std::string &texturePath);
+  Cube(Type type = Type::None) : m_type(type) {}
+
+  Type GetType() const { return m_type; }
 
   Cube() = delete;
   Cube(const Cube &) = delete;
@@ -25,6 +30,7 @@ private:
   GLuint m_vao{0};
   GLuint m_ebo{0};
   GLuint m_texture{0};
+  Type m_type;
 
   static std::array<float, 6 * 6 * 5> s_vertices;
 
