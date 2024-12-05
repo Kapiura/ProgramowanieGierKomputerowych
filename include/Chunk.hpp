@@ -35,7 +35,6 @@ private:
   glm::vec2 m_origin;
 };
 
-// Konstruktor
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline Chunk<Depth, Width, Height>::Chunk(const glm::vec2 &origin,
                                           CubePalette &palette)
