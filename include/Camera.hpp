@@ -19,6 +19,9 @@ public:
   void MoveUp(float dt);
   void MoveDown(float dt);
 
+  float GetPitch() const { return m_pitch; };
+  float GetYaw() const { return m_yaw; };
+
 private:
   void RecreateLookAt();
 

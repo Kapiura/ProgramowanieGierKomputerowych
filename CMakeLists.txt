@@ -9,7 +9,10 @@ target_include_directories(glad PUBLIC include)
 
 find_package(OpenGL REQUIRED)
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
+find_package(glm REQUIRED)
+
 include_directories(${SFML_INCLUDE_DIRS})
+include_directories(${GLM_INCLUDE_DIRS})
 
 set(SOURCES
     src/main.cpp
@@ -17,6 +20,7 @@ set(SOURCES
     src/Cube.cpp
     src/ShaderProgram.cpp
     src/PerlinNoise.cpp
+    src/CubePalette.cpp
 )
 
 set(HEADERS
@@ -26,6 +30,7 @@ set(HEADERS
     include/Chunk.hpp
     include/PerlinNoise.hpp
     include/CubePalette.hpp
+    include/Chunk.hpp
 )
 
 add_executable(majnkraft ${SOURCES} ${HEADERS})

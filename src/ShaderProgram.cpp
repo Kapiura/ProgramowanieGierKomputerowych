@@ -8,11 +8,12 @@ std::string ShaderProgram::s_vertexShaderSource = R"(
 
     out vec2 TexCoord;
 
+    uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
 
     void main() {
-        gl_Position = projection * view * vec4(aPos, 1.0);
+        gl_Position = projection * view * model *vec4(aPos, 1.0);
         TexCoord = aTexCoord;
     })";
 
@@ -123,6 +124,17 @@ void ShaderProgram::setUniform(const std::string &name,
   GLint location = glGetUniformLocation(programId, name.c_str());
   if (location != -1) {
     glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
+  } else {
+    std::cerr << "Uniform '" << name << "' not found in shader program!"
+              << std::endl;
+  }
+}
+
+void ShaderProgram::setMat4(const std::string_view name,
+                            const glm::mat4 &value) {
+  GLint location = glGetUniformLocation(programId, name.data());
+  if (location != -1) {
+    glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
   } else {
     std::cerr << "Uniform '" << name << "' not found in shader program!"
               << std::endl;

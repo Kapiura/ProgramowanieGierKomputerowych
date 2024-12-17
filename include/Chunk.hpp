@@ -1,61 +1,133 @@
 #pragma once
 #include "../include/Cube.hpp"
-#include "../include/ShaderProgram.hpp"
-#include "../include/PerlinNoise.hpp"
 #include "../include/CubePalette.hpp"
+#include "../include/PerlinNoise.hpp"
+#include "../include/ShaderProgram.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include <vector>
+#include <array>
 
-template <uint8_t Depth, uint8_t Width, uint8_t Height>
-class Chunk {
-	struct CubeData {
-		Cube::Type m_type{ Cube::Type::None };
-		bool m_isVisible{ true };
-	};
+template <uint8_t Depth, uint8_t Width, uint8_t Height> class Chunk {
+  struct CubeData {
+    Cube::Type m_type{Cube::Type::None};
+    bool m_isVisible{true};
+  };
 
-	using FlattenData_t = std::array<CubeData, Depth* Width* Height>;
+  using FlattenData_t = std::array<CubeData, Depth * Width * Height>;
+
 public:
-	Chunk(const glm::vec2& origin, CubePalette& palette);
+  Chunk(const glm::vec2 &origin, CubePalette &palette);
 
-	void Generate(const PerlinNoise& rng);
+  void Generate(const PerlinNoise &rng);
 
-	void Draw(ShaderProgram& shader) const;
+  void Draw(ShaderProgram &shader) const;
 
 private:
-	size_t CoordsToIndex(size_t depth, size_t width, size_t height) const;
-	void UpdateVisibility();
+  size_t CoordsToIndex(size_t depth, size_t width, size_t height) const;
 
-	CubePalette& m_palette;
-	FlattenData_t m_data;
-	glm::vec2 m_origin;
+  void UpdateVisibility();
+
+  CubePalette &m_palette;
+  FlattenData_t m_data;
+  glm::vec2 m_origin;
 };
 
-template<uint8_t Depth, uint8_t Width, uint8_t Height>
-inline Chunk<Depth, Width, Height>::Chunk(const glm::vec2& origin, CubePalette& palette) {
+template <uint8_t Depth, uint8_t Width, uint8_t Height>
+inline Chunk<Depth, Width, Height>::Chunk(const glm::vec2 &origin,
+                                          CubePalette &palette)
+    : m_origin(origin), m_palette(palette), m_data{} {}
+
+template <uint8_t Depth, uint8_t Width, uint8_t Height>
+inline void Chunk<Depth, Width, Height>::Generate(const PerlinNoise &rng) {
+  float scale = 0.09f;
+
+  for (size_t z = 0; z < Depth; ++z) {
+    for (size_t x = 0; x < Width; ++x) {
+      float height = rng.At(glm::vec3(x * scale, 0.0f, z * scale)) * Height;
+
+      for (size_t y = 0; y < Height; ++y) {
+        size_t index = CoordsToIndex(z, x, y);
+
+        if (y < height - 1) {
+          m_data[index].m_type = Cube::Type::Stone;
+        } else if (y == static_cast<int>(height) - 1) {
+          m_data[index].m_type = Cube::Type::GrassDebug;
+        } else {
+          m_data[index].m_type = Cube::Type::None;
+        }
+      }
+
+      if (height > 0 && height < Height) {
+        size_t topIndex = CoordsToIndex(z, x, static_cast<size_t>(height) - 1);
+        m_data[topIndex].m_type = Cube::Type::GrassDebug;
+      }
+    }
+  }
+  UpdateVisibility();
 }
 
-template<uint8_t Depth, uint8_t Width, uint8_t Height>
-inline void Chunk<Depth, Width, Height>::Generate(const PerlinNoise& rng) {
+template <uint8_t Depth, uint8_t Width, uint8_t Height>
+inline void Chunk<Depth, Width, Height>::Draw(ShaderProgram &shader) const {
+  shader.use();
 
+  for (size_t z = 0; z < Depth; ++z) {
+    for (size_t x = 0; x < Width; ++x) {
+      for (size_t y = 0; y < Height; ++y) {
+        size_t index = CoordsToIndex(z, x, y);
+
+        if (m_data[index].m_isVisible) {
+          glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+          shader.setMat4("model", model);
+          m_palette.LookUp(m_data[index].m_type).Draw();
+        }
+      }
+    }
+  }
 }
 
-template<uint8_t Depth, uint8_t Width, uint8_t Height>
-inline void Chunk<Depth, Width, Height>::Draw(ShaderProgram& shader) const {
-
+template <uint8_t Depth, uint8_t Width, uint8_t Height>
+inline size_t Chunk<Depth, Width, Height>::CoordsToIndex(size_t depth,
+                                                         size_t width,
+                                                         size_t height) const {
+  return height * static_cast<size_t>(Depth) * static_cast<size_t>(Width) +
+         width * static_cast<size_t>(Depth) + depth;
 }
 
-template<uint8_t Depth, uint8_t Width, uint8_t Height>
-inline size_t Chunk<Depth, Width, Height>::CoordsToIndex(size_t depth, size_t width, size_t height) const {
-	return height * static_cast<size_t>(Depth) * static_cast<size_t>(Width)
-		+ width * static_cast<size_t>(Depth)
-		+ depth;
-}
-
-template<uint8_t Depth, uint8_t Width, uint8_t Height>
+template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline void Chunk<Depth, Width, Height>::UpdateVisibility() {
+  for (size_t z = 0; z < Depth; ++z) {
+    for (size_t x = 0; x < Width; ++x) {
+      for (size_t y = 0; y < Height; ++y) {
+        size_t index = CoordsToIndex(z, x, y);
 
+        if (m_data[index].m_type == Cube::Type::None) {
+          m_data[index].m_isVisible = false;
+          continue;
+        }
+        bool isVisible = false;
+        if (z == 0 ||
+            m_data[CoordsToIndex(z - 1, x, y)].m_type == Cube::Type::None)
+          isVisible = true;
+        if (z == Depth - 1 ||
+            m_data[CoordsToIndex(z + 1, x, y)].m_type == Cube::Type::None)
+          isVisible = true;
+        if (x == 0 ||
+            m_data[CoordsToIndex(z, x - 1, y)].m_type == Cube::Type::None)
+          isVisible = true;
+        if (x == Width - 1 ||
+            m_data[CoordsToIndex(z, x + 1, y)].m_type == Cube::Type::None)
+          isVisible = true;
+        if (y == 0 ||
+            m_data[CoordsToIndex(z, x, y - 1)].m_type == Cube::Type::None)
+          isVisible = true;
+        if (y == Height - 1 ||
+            m_data[CoordsToIndex(z, x, y + 1)].m_type == Cube::Type::None)
+          isVisible = true;
+        m_data[index].m_isVisible = isVisible;
+      }
+    }
+  }
 }

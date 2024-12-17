@@ -1,8 +1,10 @@
 #include "../include/PerlinNoise.hpp"
 #include <algorithm>
 #include <cmath>
+#include <random>
 
-namespace {
+namespace
+{
 	constexpr std::array<uint8_t, 256> s_permutations = {
 		151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
 		8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,
@@ -36,11 +38,16 @@ PerlinNoise::PerlinNoise() {
 	std::copy(s_permutations.begin(), s_permutations.end(), m_permutations.begin() + 256);
 }
 
-PerlinNoise::PerlinNoise(float seed) {
-    //...
+PerlinNoise::PerlinNoise(float seed)
+{
+    std::iota(m_permutations.begin(), m_permutations.begin() + 256, 0);
+    std::default_random_engine engine(static_cast<unsigned int>(seed));
+    std::shuffle(m_permutations.begin(), m_permutations.begin() + 256, engine);
+    std::copy(m_permutations.begin(), m_permutations.begin() + 256, m_permutations.begin() + 256);
 }
 
-float PerlinNoise::At(const glm::vec3& coords) const {
+float PerlinNoise::At(const glm::vec3& coords) const
+{
 	const float _x = std::floor(coords.x);
 	const float _y = std::floor(coords.y);
 	const float _z = std::floor(coords.z);
