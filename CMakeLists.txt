@@ -21,6 +21,8 @@ set(SOURCES
     src/ShaderProgram.cpp
     src/PerlinNoise.cpp
     src/CubePalette.cpp
+    src/AABB.cpp
+    src/Ray.cpp
 )
 
 set(HEADERS
@@ -31,6 +33,8 @@ set(HEADERS
     include/PerlinNoise.hpp
     include/CubePalette.hpp
     include/Chunk.hpp
+    include/AABB.hpp
+    include/Ray.hpp
 )
 
 add_executable(majnkraft ${SOURCES} ${HEADERS})
