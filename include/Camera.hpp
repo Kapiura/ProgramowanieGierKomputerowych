@@ -19,7 +19,9 @@ public:
   void MoveUp(float dt);
   void MoveDown(float dt);
 
-private:
+  float GetPitch() const { return m_pitch; };
+  float GetYaw() const { return m_yaw; };
+
   void RecreateLookAt();
 
   glm::mat4 m_projection;

@@ -13,6 +13,8 @@ public:
 
   Type GetType() const { return m_type; }
 
+  enum class Type { None, Grass, Stone, GrassDebug };
+
   Cube() = delete;
   Cube(const Cube &) = delete;
   Cube &operator=(const Cube &) = delete;
