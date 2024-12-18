@@ -22,7 +22,6 @@ public:
   float GetPitch() const { return m_pitch; };
   float GetYaw() const { return m_yaw; };
 
-private:
   void RecreateLookAt();
 
   glm::mat4 m_projection;
