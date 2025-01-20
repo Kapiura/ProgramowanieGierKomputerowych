@@ -1,2 +1,2 @@
 # ProgramowanieGierKomputerowych
-majnkrafta pisze
+majnkrafta pisze w celach edukacyjnych - studia
