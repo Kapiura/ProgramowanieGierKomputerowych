@@ -61,15 +61,9 @@ float PerlinNoise::At(const glm::vec3& coords) const
   const std::int32_t iy = static_cast<std::int32_t>(_y) & 255;
   const std::int32_t iz = static_cast<std::int32_t>(_z) & 255;
 
-<<<<<<< HEAD
-  const float fx = (coords.x - _x);
-  const float fy = (coords.y - _y);
-  const float fz = (coords.z - _z);
-=======
 	const float fx = (scaledCoords.x - _x);
 	const float fy = (scaledCoords.y - _y);
 	const float fz = (scaledCoords.z - _z);
->>>>>>> ubogacaczeKulturowe
 
   const float u = Fade(fx);
   const float v = Fade(fy);
@@ -101,11 +95,6 @@ float PerlinNoise::At(const glm::vec3& coords) const
   const float r0 = std::lerp(q0, q1, v);
   const float r1 = std::lerp(q2, q3, v);
 
-<<<<<<< HEAD
-  const float result = std::lerp(r0, r1, w);
-  return (result * 0.5f) + 0.5f;
-=======
 	const float result = std::lerp(r0, r1, w);
 	return (result * 0.5f) + 0.5f;
->>>>>>> ubogacaczeKulturowe
 }

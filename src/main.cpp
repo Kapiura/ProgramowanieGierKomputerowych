@@ -70,18 +70,18 @@ int main() {
   // chunk.Generate(perlin);
 
   // shaders.setUniform("projection", camera.Projection());
-  Ray::HitType hitType;
-  Chunk<chunkSize, chunkSize, chunkSize>::HitRecord hitRecord;
+  // Ray::HitType hitType;
+  // Chunk<chunkSize, chunkSize, chunkSize>::HitRecord hitRecord;
 
-  // Cube cube("../img/grass.jpg");
-  CubePalette palette;
+  // // Cube cube("../img/grass.jpg");
+  // // CubePalette palette;
 
-  // shaders.setUniform("projection", camera.Projection());
-  PerlinNoise perlin;
+  // // shaders.setUniform("projection", camera.Projection());
+  // PerlinNoise perlin;
 
-  const size_t chunkSize = 16;
-  Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
-  chunk.Generate(perlin);
+  // const size_t chunkSize = 16;
+  // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
+  // chunk.Generate(perlin);
 
   sf::Clock clock;
   sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
