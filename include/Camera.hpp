@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Window.hpp>
 #include <glm/ext.hpp>
+#include <functional>
 #include <glm/glm.hpp>
 
 class Camera {

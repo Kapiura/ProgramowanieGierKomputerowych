@@ -48,17 +48,20 @@ PerlinNoise::PerlinNoise(float seed)
 
 float PerlinNoise::At(const glm::vec3& coords) const
 {
-	const float _x = std::floor(coords.x);
-	const float _y = std::floor(coords.y);
-	const float _z = std::floor(coords.z);
+	const float scale = 0.3f;
+    glm::vec3 scaledCoords = coords * scale;
+
+	const float _x = std::floor(scaledCoords.x);
+	const float _y = std::floor(scaledCoords.y);
+	const float _z = std::floor(scaledCoords.z);
 
 	const std::int32_t ix = static_cast<std::int32_t>(_x) & 255;
 	const std::int32_t iy = static_cast<std::int32_t>(_y) & 255;
 	const std::int32_t iz = static_cast<std::int32_t>(_z) & 255;
 
-	const float fx = (coords.x - _x);
-	const float fy = (coords.y - _y);
-	const float fz = (coords.z - _z);
+	const float fx = (scaledCoords.x - _x);
+	const float fy = (scaledCoords.y - _y);
+	const float fz = (scaledCoords.z - _z);
 
 	const float u = Fade(fx);
 	const float v = Fade(fy);
