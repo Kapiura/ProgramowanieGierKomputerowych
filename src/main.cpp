@@ -13,8 +13,14 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <random>
 
 int main() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(10000, 99999);
+  int random_number = dis(gen);
+
   sf::ContextSettings contextSettings;
   contextSettings.depthBits = 24;
   contextSettings.stencilBits = 8;
@@ -36,7 +42,7 @@ int main() {
              static_cast<GLsizei>(window.getSize().y));
   glEnable(GL_DEPTH_TEST);
 
-  Camera camera(glm::vec3(8.0f, 10.0f, 8.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  Camera camera(glm::vec3(50.0f, 10.0f, 50.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                 -90.0f, 0.0f);
   glm::vec3 velocity(0.0f, 0.0f, 0.0f); // Początkowa prędkość
 
@@ -51,7 +57,8 @@ int main() {
 
   // Cube cube("../img/grass.jpg");
   CubePalette palette;
-  PerlinNoise perlin;
+  PerlinNoise perlin(random_number);
+  std::cout << random_number << "\n";
 
   const size_t chunkSize = 16;
   // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
@@ -70,18 +77,8 @@ int main() {
   // chunk.Generate(perlin);
 
   // shaders.setUniform("projection", camera.Projection());
-  // Ray::HitType hitType;
-  // Chunk<chunkSize, chunkSize, chunkSize>::HitRecord hitRecord;
-
-  // // Cube cube("../img/grass.jpg");
-  // // CubePalette palette;
-
-  // // shaders.setUniform("projection", camera.Projection());
-  // PerlinNoise perlin;
-
-  // const size_t chunkSize = 16;
-  // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
-  // chunk.Generate(perlin);
+  Ray::HitType hitType;
+  Chunk<chunkSize, chunkSize, chunkSize>::HitRecord hitRecord;
 
   sf::Clock clock;
   sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
