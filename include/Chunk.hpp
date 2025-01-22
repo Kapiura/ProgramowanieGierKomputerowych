@@ -74,7 +74,7 @@ inline void Chunk<Depth, Width, Height>::Generate(const PerlinNoise &rng) {
         if (y < height - 1) {
           m_data[index].m_type = Cube::Type::Stone;
         } else if (y == static_cast<int>(height) - 1) {
-          m_data[index].m_type = Cube::Type::GrassDebug;
+          m_data[index].m_type = Cube::Type::Grass;
         } else {
           m_data[index].m_type = Cube::Type::None;
         }
@@ -82,7 +82,7 @@ inline void Chunk<Depth, Width, Height>::Generate(const PerlinNoise &rng) {
 
       if (height > 0 && height < Height) {
         size_t topIndex = CoordsToIndex(z, x, static_cast<size_t>(height) - 1);
-        m_data[topIndex].m_type = Cube::Type::GrassDebug;
+        m_data[topIndex].m_type = Cube::Type::Grass;
       }
     }
   }

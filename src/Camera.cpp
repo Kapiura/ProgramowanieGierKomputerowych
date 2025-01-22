@@ -1,4 +1,5 @@
 #include "../include/Camera.hpp"
+#include <functional>
 
 glm::vec3 Camera::s_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 

@@ -36,8 +36,9 @@ int main() {
              static_cast<GLsizei>(window.getSize().y));
   glEnable(GL_DEPTH_TEST);
 
-  Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  Camera camera(glm::vec3(8.0f, 10.0f, 8.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                 -90.0f, 0.0f);
+  glm::vec3 velocity(0.0f, 0.0f, 0.0f); // Początkowa prędkość
 
   ShaderProgram shaders;
   GLuint programId = shaders.getProgramId();
@@ -53,8 +54,20 @@ int main() {
   PerlinNoise perlin;
 
   const size_t chunkSize = 16;
-  Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
-  chunk.Generate(perlin);
+  // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
+  std::vector<Chunk<chunkSize, chunkSize, chunkSize>> chunks;
+  const int gridWidth = 9;
+  const int gridHeight = 9;
+
+  for (int x = 0; x < gridWidth; ++x) {
+    for (int y = 0; y < gridHeight; ++y) {
+      glm::vec2 position(x * chunkSize, y * chunkSize);
+      chunks.emplace_back(position, palette);
+      chunks.back().Generate(perlin);
+    }
+  }
+
+  // chunk.Generate(perlin);
 
   // shaders.setUniform("projection", camera.Projection());
   Ray::HitType hitType;
@@ -88,37 +101,44 @@ int main() {
       }
       if (event.type == sf::Event::MouseButtonPressed) {
         Ray ray(camera.m_position, camera.m_front);
-        Ray::HitType hitType = chunk.Hit(ray, 0.0f, 3.0f, hitRecord);
+        for (auto &chunk : chunks) {
+          Ray::HitType hitType = chunk.Hit(ray, 0.0f, 3.0f, hitRecord);
+          if (hitType == Ray::HitType::Hit) {
 
-        if (hitType == Ray::HitType::Hit) {
-          std::cout << "Hit block at: (" << hitRecord.m_cubeIndex.x << ", "
-                    << hitRecord.m_cubeIndex.y << ", "
-                    << hitRecord.m_cubeIndex.z << ")" << std::endl;
+            Ray::HitType hitType = chunk.Hit(ray, 0.0f, 3.0f, hitRecord);
 
-          if (event.mouseButton.button == sf::Mouse::Left) {
-            if (chunk.RemoveBlock(hitRecord.m_cubeIndex.x,
-                                  hitRecord.m_cubeIndex.y,
-                                  hitRecord.m_cubeIndex.z)) {
-              std::cout << "Block removed at: (" << hitRecord.m_cubeIndex.x
-                        << ", " << hitRecord.m_cubeIndex.y << ", "
+            if (hitType == Ray::HitType::Hit) {
+              std::cout << "Hit block at: (" << hitRecord.m_cubeIndex.x << ", "
+                        << hitRecord.m_cubeIndex.y << ", "
                         << hitRecord.m_cubeIndex.z << ")" << std::endl;
+
+              if (event.mouseButton.button == sf::Mouse::Left) {
+                if (chunk.RemoveBlock(hitRecord.m_cubeIndex.x,
+                                      hitRecord.m_cubeIndex.y,
+                                      hitRecord.m_cubeIndex.z)) {
+                  std::cout << "Block removed at: (" << hitRecord.m_cubeIndex.x
+                            << ", " << hitRecord.m_cubeIndex.y << ", "
+                            << hitRecord.m_cubeIndex.z << ")" << std::endl;
+                } else
+                  std::cout << "Failed to remove block" << std::endl;
+              } else if (event.mouseButton.button == sf::Mouse::Right) {
+                glm::ivec3 neighbor = hitRecord.m_neighbourIndex;
+                if (chunk.PlaceBlock(neighbor.x, neighbor.y, neighbor.z,
+                                     Cube::Type::Grass)) {
+                  std::cout << "Block placed at: (" << neighbor.x << ", "
+                            << neighbor.y << ", " << neighbor.z << ")"
+                            << std::endl;
+                } else
+                  std::cout << "Failed to place block" << std::endl;
+              }
             } else
-              std::cout << "Failed to remove block" << std::endl;
-          } else if (event.mouseButton.button == sf::Mouse::Right) {
-            glm::ivec3 neighbor = hitRecord.m_neighbourIndex;
-            if (chunk.PlaceBlock(neighbor.x, neighbor.y, neighbor.z,
-                                 Cube::Type::Grass)) {
-              std::cout << "Block placed at: (" << neighbor.x << ", "
-                        << neighbor.y << ", " << neighbor.z << ")" << std::endl;
-            } else
-              std::cout << "Failed to place block" << std::endl;
+              std::cout << "No block hit" << std::endl;
           }
-        } else
-          std::cout << "No block hit" << std::endl;
+        }
       }
     }
 
-    float movementSpeed = 0.0275f;
+    float movementSpeed = 0.0675f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
       camera.MoveForward(dt + movementSpeed);
     }
@@ -154,7 +174,11 @@ int main() {
     glDrawArrays(GL_LINES, 0, 2);
 
     // cube.Draw();
-    chunk.Draw(shaders);
+    for (auto &chunk : chunks)
+      chunk.Draw(shaders);
+
+
+    // chunk.Draw(shaders);
 
     window.display();
   }
