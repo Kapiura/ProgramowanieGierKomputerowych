@@ -130,7 +130,7 @@ inline Ray::HitType Chunk<Depth, Width, Height>::Hit(const Ray& ray, Ray::time_t
                 }
 
                 glm::vec3 cubeMin = chunkOffset + glm::vec3(x, y, z);
-                glm::vec3 cubeMax = cubeMin + glm::vec3(1.0f); // Cubes are 1x1x1
+                glm::vec3 cubeMax = cubeMin + glm::vec3(1.0f);
                 AABB cubeAABB(cubeMin, cubeMax);
 
                 AABB::HitRecord cubeRecord;
