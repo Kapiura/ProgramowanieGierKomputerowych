@@ -24,6 +24,8 @@ public:
   void cleanUp(std::pair<GLuint, GLuint> vv);
   void setUniform(const std::string &name, const glm::mat4 &matrix);
 
+  void loadFromMemory(const std::string& vertexSource, const std::string& fragmentSource);
+
 private:
   GLuint createShader(const GLchar *shaderSource, GLenum shaderType);
   GLuint createProgram(GLuint vertexShader, GLuint fragmentShader,

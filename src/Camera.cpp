@@ -1,25 +1,14 @@
 #include "../include/Camera.hpp"
-#include <functional>
+
+
 
 glm::vec3 Camera::s_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-Camera::Camera(
-  const glm::vec3 &position,
-  const glm::vec3 &front,
-  float yaw,
-  float pitch):
-    m_position(position),
-    m_front(front),
-    m_yaw(yaw),
-    m_pitch(pitch)
+Camera::Camera(const glm::vec3 &position, const glm::vec3 &front, float yaw, float pitch)
+    : m_position(position), m_front(front), m_yaw(yaw), m_pitch(pitch)
 {
   RecreateLookAt();
-  m_projection =
-      glm::perspective(
-        glm::radians(45.0f),
-        800.0f / 600.0f,
-        0.1f,
-        100.0f);
+  m_projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 }
 
 void Camera::RecreateLookAt()

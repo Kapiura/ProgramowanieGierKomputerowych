@@ -28,6 +28,7 @@ set(SOURCES
     src/CubePalette.cpp
     src/AABB.cpp
     src/Ray.cpp
+    src/World.cpp
 )
 
 set(HEADERS
@@ -38,6 +39,7 @@ set(HEADERS
     include/Chunk.hpp
     include/AABB.hpp
     include/Ray.hpp
+    include/World.hpp
 )
 
 add_executable(majnkraft ${SOURCES} ${HEADERS})

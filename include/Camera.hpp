@@ -1,10 +1,11 @@
 #pragma once
-#include <SFML/Window.hpp>
 #include <glm/ext.hpp>
-#include <functional>
 #include <glm/glm.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
-class Camera {
+class Camera
+{
 public:
   Camera(const glm::vec3 &position, const glm::vec3 &front, float yaw,
          float pitch);
@@ -19,15 +20,10 @@ public:
   void MoveRight(float dt);
   void MoveUp(float dt);
   void MoveDown(float dt);
-
-  float GetPitch() const { return m_pitch; };
-  float GetYaw() const { return m_yaw; };
-
   void RecreateLookAt();
 
   glm::mat4 m_projection;
   glm::mat4 m_lookAt;
-
   glm::vec3 m_position;
   glm::vec3 m_up;
   glm::vec3 m_front;

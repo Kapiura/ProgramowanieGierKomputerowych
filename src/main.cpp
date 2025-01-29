@@ -13,7 +13,9 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <thread>
 #include <random>
+
 
 int main() {
   std::random_device rd;
@@ -27,8 +29,8 @@ int main() {
   contextSettings.majorVersion = 3;
   contextSettings.minorVersion = 3;
 
-  sf::Window window(sf::VideoMode(800, 600), "Majnkraft", sf::Style::Default,
-                    contextSettings);
+  sf::RenderWindow window(sf::VideoMode(800, 600), "Majnkraft",
+                          sf::Style::Default, contextSettings);
   window.setActive(true);
   window.setMouseCursorGrabbed(true);
   window.setMouseCursorVisible(false);
@@ -40,11 +42,9 @@ int main() {
 
   glViewport(0, 0, static_cast<GLsizei>(window.getSize().x),
              static_cast<GLsizei>(window.getSize().y));
-  glEnable(GL_DEPTH_TEST);
 
-  Camera camera(glm::vec3(50.0f, 10.0f, 50.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  Camera camera(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                 -90.0f, 0.0f);
-  glm::vec3 velocity(0.0f, 0.0f, 0.0f);
 
   ShaderProgram shaders;
   GLuint programId = shaders.getProgramId();
@@ -54,19 +54,19 @@ int main() {
   }
 
   shaders.use();
+  shaders.setUniform("projection", camera.Projection());
 
-  // Cube cube("../img/grass.jpg");
   CubePalette palette;
   PerlinNoise perlin(random_number);
-  std::cout << random_number << "\n";
+  // World world(glm::vec2(0, 0), palette, perlin);
 
   const size_t chunkSize = 16;
-  // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
   std::vector<Chunk<chunkSize, chunkSize, chunkSize>> chunks;
-  const int gridWidth = 9;
-  const int gridHeight = 9;
-
-  for (int x = 0; x < gridWidth; ++x) {
+  const int gridWidth = 6;
+  const int gridHeight = 6;
+  // Chunk<chunkSize, chunkSize, chunkSize> chunk(glm::vec2(0, 0), palette);
+  // chunk.Generate(perlin);
+    for (int x = 0; x < gridWidth; ++x) {
     for (int y = 0; y < gridHeight; ++y) {
       glm::vec2 position(x * chunkSize, y * chunkSize);
       chunks.emplace_back(position, palette);
@@ -74,108 +74,88 @@ int main() {
     }
   }
 
-  // chunk.Generate(perlin);
+  sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
+  sf::Vector2i mousePosition = sf::Mouse::getPosition();
 
-  // shaders.setUniform("projection", camera.Projection());
   Ray::HitType hitType;
   Chunk<chunkSize, chunkSize, chunkSize>::HitRecord hitRecord;
 
   sf::Clock clock;
-  sf::Vector2i windowCenter(window.getSize().x / 2, window.getSize().y / 2);
-  sf::Vector2i mousePosition = sf::Mouse::getPosition();
-
   glEnable(GL_DEPTH_TEST);
 
+  sf::Vector2u windowSize = window.getSize();
   while (window.isOpen()) {
     const float dt = clock.restart().asSeconds();
 
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     sf::Event event;
     while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) {
+      if (event.type == sf::Event::Closed)
         window.close();
-      } else if (event.type == sf::Event::Resized) {
+      else if (event.type == sf::Event::Resized)
         glViewport(0, 0, event.size.width, event.size.height);
-      }
-      if (event.type == sf::Event::MouseButtonPressed) {
-        Ray ray(camera.m_position, camera.m_front);
+
+      else if (event.type == sf::Event::MouseButtonPressed) {
         for (auto &chunk : chunks) {
-          Ray::HitType hitType = chunk.Hit(ray, 0.0f, 3.0f, hitRecord);
+
+          glm::vec3 direction = glm::normalize(camera.m_front);
+          hitType = chunk.Hit(Ray(camera.m_position, direction), -6.0f, 6.0f,
+                              hitRecord);
+
           if (hitType == Ray::HitType::Hit) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+              chunk.RemoveBlock(hitRecord.m_cubeIndex.x,
+                                hitRecord.m_cubeIndex.y,
+                                hitRecord.m_cubeIndex.z);
+            } else if (event.mouseButton.button == sf::Mouse::Right) {
+              glm::vec3 hitCubeCenter =
+                  glm::vec3(hitRecord.m_cubeIndex) + glm::vec3(0.5f);
 
-            Ray::HitType hitType = chunk.Hit(ray, 0.0f, 3.0f, hitRecord);
+              glm::vec3 direction =
+                  glm::normalize(hitCubeCenter - camera.m_position);
 
-            if (hitType == Ray::HitType::Hit) {
-              std::cout << "Hit block at: (" << hitRecord.m_cubeIndex.x << ", "
-                        << hitRecord.m_cubeIndex.y << ", "
-                        << hitRecord.m_cubeIndex.z << ")" << std::endl;
+              glm::ivec3 neighborOffset(
+                  (direction.x > 0.5f) ? 1 : ((direction.x < -0.5f) ? -1 : 0),
+                  (direction.y > 0.5f) ? 1 : ((direction.y < -0.5f) ? -1 : 0),
+                  (direction.z > 0.5f) ? 1 : ((direction.z < -0.5f) ? -1 : 0));
 
-              if (event.mouseButton.button == sf::Mouse::Left) {
-                if (chunk.RemoveBlock(hitRecord.m_cubeIndex.x,
-                                      hitRecord.m_cubeIndex.y,
-                                      hitRecord.m_cubeIndex.z)) {
-                  std::cout << "Block removed at: (" << hitRecord.m_cubeIndex.x
-                            << ", " << hitRecord.m_cubeIndex.y << ", "
-                            << hitRecord.m_cubeIndex.z << ")" << std::endl;
-                } else
-                  std::cout << "Failed to remove block" << std::endl;
-              } else if (event.mouseButton.button == sf::Mouse::Right) {
-                glm::ivec3 neighbor = hitRecord.m_neighbourIndex;
-                if (chunk.PlaceBlock(neighbor.x, neighbor.y, neighbor.z,
-                                     Cube::Type::Grass)) {
-                  std::cout << "Block placed at: (" << neighbor.x << ", "
-                            << neighbor.y << ", " << neighbor.z << ")"
-                            << std::endl;
-                } else
-                  std::cout << "Failed to place block" << std::endl;
-              }
-            } else
-              std::cout << "No block hit" << std::endl;
+              hitRecord.m_neighbourIndex =
+                  hitRecord.m_cubeIndex + neighborOffset;
+
+              chunk.PlaceBlock(hitRecord.m_neighbourIndex.x,
+                               hitRecord.m_neighbourIndex.y,
+                               hitRecord.m_neighbourIndex.z, Cube::Type::Stone);
+            }
           }
         }
       }
     }
 
-    float movementSpeed = 0.0675f;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+    float movementSpeed = 0.2f;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
       camera.MoveForward(dt + movementSpeed);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
       camera.MoveBackward(dt + movementSpeed);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
       camera.MoveLeft(dt + movementSpeed);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
       camera.MoveRight(dt + movementSpeed);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
       camera.MoveUp(dt + movementSpeed);
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
       camera.MoveDown(dt + movementSpeed);
-    }
 
     const sf::Vector2i newMousePosition = sf::Mouse::getPosition();
     camera.Rotate(newMousePosition - mousePosition);
     mousePosition = newMousePosition;
-    // std::cout << "Yaw: " << camera.GetYaw() << ", Pitch: " <<
-    // camera.GetPitch() << std::endl; std::cout << "Mouse Position: " <<
-    // newMousePosition.x << ", " << newMousePosition.y << std::endl;
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaders.setUniform("view", camera.View());
     shaders.setUniform("projection", camera.Projection());
 
-    glDrawArrays(GL_LINES, 0, 2);
-
-    // cube.Draw();
-    for (auto &chunk : chunks)
+   for (auto &chunk : chunks)
       chunk.Draw(shaders);
-
-
-    // chunk.Draw(shaders);
 
     window.display();
   }

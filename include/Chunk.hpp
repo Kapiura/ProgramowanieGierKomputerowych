@@ -30,6 +30,8 @@ public:
 
   Chunk(const glm::vec2 &origin, CubePalette &palette);
 
+  glm::vec3 getPosition() const;
+
   void Generate(const PerlinNoise &rng);
   void Draw(ShaderProgram &shader) const;
 
@@ -60,53 +62,53 @@ inline Chunk<Depth, Width, Height>::Chunk(const glm::vec2& origin, CubePalette& 
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline void Chunk<Depth, Width, Height>::Generate(const PerlinNoise &rng) {
-  float scale = 0.09f;
+    float scale = 0.09f;
 
-  for (size_t z = 0; z < Depth; ++z) {
     for (size_t x = 0; x < Width; ++x) {
-      float height = rng.At(glm::vec3((m_origin.x + x) * scale, 0.0f,
-                                      (m_origin.y + z) * scale)) *
-                     Height;
+        for (size_t z = 0; z < Depth; ++z) {
+            float height = rng.At(glm::vec3((m_origin.x + x) * scale, 0.0f,
+                                            (m_origin.y + z) * scale)) *
+                           Height;
 
-      for (size_t y = 0; y < Height; ++y) {
-        size_t index = CoordsToIndex(z, x, y);
+            for (size_t y = 0; y < Height; ++y) {
+                size_t index = CoordsToIndex(x, y, z);
 
-        if (y < height - 1) {
-          m_data[index].m_type = Cube::Type::Stone;
-        } else if (y == static_cast<int>(height) - 1) {
-          m_data[index].m_type = Cube::Type::Grass;
-        } else {
-          m_data[index].m_type = Cube::Type::None;
+                if (y < height - 1) {
+                    m_data[index].m_type = Cube::Type::Stone;
+                } else if (y == static_cast<int>(height) - 1) {
+                    m_data[index].m_type = Cube::Type::Grass;
+                } else {
+                    m_data[index].m_type = Cube::Type::None;
+                }
+            }
+
+            if (height > 0 && height < Height) {
+                size_t topIndex = CoordsToIndex(x, static_cast<size_t>(height) - 1, z);
+                m_data[topIndex].m_type = Cube::Type::Grass;
+            }
         }
-      }
-
-      if (height > 0 && height < Height) {
-        size_t topIndex = CoordsToIndex(z, x, static_cast<size_t>(height) - 1);
-        m_data[topIndex].m_type = Cube::Type::Grass;
-      }
     }
-  }
-  UpdateVisibility();
+    UpdateVisibility();
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline void Chunk<Depth, Width, Height>::Draw(ShaderProgram &shader) const {
-  shader.use();
+    shader.use();
 
-  for (size_t z = 0; z < Depth; ++z) {
     for (size_t x = 0; x < Width; ++x) {
-      for (size_t y = 0; y < Height; ++y) {
-        size_t index = CoordsToIndex(z, x, y);
+        for (size_t y = 0; y < Height; ++y) {
+            for (size_t z = 0; z < Depth; ++z) {
+                size_t index = CoordsToIndex(x, y, z);
 
-        if (m_data[index].m_isVisible) {
-          glm::mat4 model = glm::translate(
-              glm::mat4(1.0f), glm::vec3(m_origin.x + x, y, m_origin.y + z));
-          shader.setMat4("model", model);
-          m_palette.LookUp(m_data[index].m_type).Draw();
+                if (m_data[index].m_isVisible) {
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f), glm::vec3(m_origin.x + x, y, m_origin.y + z));
+                    shader.setMat4("model", model);
+                    m_palette.LookUp(m_data[index].m_type).Draw();
+                }
+            }
         }
-      }
     }
-  }
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
@@ -121,10 +123,11 @@ inline Ray::HitType Chunk<Depth, Width, Height>::Hit(const Ray& ray, Ray::time_t
     Ray::time_t closestTime = max;
     bool hitDetected = false;
 
-    for (size_t z = 0; z < Depth; ++z) {
-        for (size_t x = 0; x < Width; ++x) {
-            for (size_t y = 0; y < Height; ++y) {
-                size_t index = CoordsToIndex(z, x, y);
+    for (size_t x = 0; x < Width; ++x) {
+        for (size_t y = 0; y < Height; ++y) {
+            for (size_t z = 0; z < Depth; ++z) {
+                size_t index = CoordsToIndex(x, y, z);
+
                 if (!m_data[index].m_isVisible || m_data[index].m_type == Cube::Type::None) {
                     continue;
                 }
@@ -136,7 +139,7 @@ inline Ray::HitType Chunk<Depth, Width, Height>::Hit(const Ray& ray, Ray::time_t
                 AABB::HitRecord cubeRecord;
                 if (cubeAABB.Hit(ray, min, closestTime, cubeRecord) == Ray::HitType::Hit) {
                     closestTime = cubeRecord.m_time;
-                    record.m_cubeIndex = glm::ivec3(z, x, y);
+                    record.m_cubeIndex = glm::ivec3(x, y, z);
 
                     glm::ivec3 neighborOffset = glm::ivec3(0);
                     if (cubeRecord.m_axis == AABB::Axis::x) {
@@ -158,9 +161,8 @@ inline Ray::HitType Chunk<Depth, Width, Height>::Hit(const Ray& ray, Ray::time_t
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
-inline bool Chunk<Depth, Width, Height>::RemoveBlock(uint8_t width, uint8_t height, uint8_t depth)
-{
-    size_t index = CoordsToIndex(depth, width, height);
+inline bool Chunk<Depth, Width, Height>::RemoveBlock(uint8_t x, uint8_t y, uint8_t z) {
+    size_t index = CoordsToIndex(x, y, z);
     if (m_data[index].m_type == Cube::Type::None)
         return false;
     m_data[index].m_type = Cube::Type::None;
@@ -169,48 +171,43 @@ inline bool Chunk<Depth, Width, Height>::RemoveBlock(uint8_t width, uint8_t heig
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
-inline bool Chunk<Depth, Width, Height>::PlaceBlock(uint8_t width, uint8_t height, uint8_t depth, Cube::Type type) {
-    size_t index = CoordsToIndex(depth, width, height);
+inline bool Chunk<Depth, Width, Height>::PlaceBlock(uint8_t x, uint8_t y, uint8_t z, Cube::Type type) {
+    size_t index = CoordsToIndex(x, y, z);
     if (m_data[index].m_type != Cube::Type::None) {
         return false;
     }
-
     m_data[index].m_type = type;
     UpdateVisibility();
     return true;
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
-inline size_t Chunk<Depth, Width, Height>::CoordsToIndex(size_t depth,
-                                                         size_t width,
-                                                         size_t height) const {
-  return height * static_cast<size_t>(Depth) * static_cast<size_t>(Width) +
-         width * static_cast<size_t>(Depth) + depth;
+inline size_t Chunk<Depth, Width, Height>::CoordsToIndex(size_t x, size_t y, size_t z) const {
+   return x + Width * (y + Height * z);;
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline void Chunk<Depth, Width, Height>::UpdateVisibility() {
-    for (size_t z = 0; z < Depth; ++z) {
-        for (size_t x = 0; x < Width; ++x) {
-            for (size_t y = 0; y < Height; ++y) {
-                size_t index = CoordsToIndex(z, x, y);
+    for (size_t x = 0; x < Width; ++x) {
+        for (size_t y = 0; y < Height; ++y) {
+            for (size_t z = 0; z < Depth; ++z) {
+                size_t index = CoordsToIndex(x, y, z);
+
                 if (m_data[index].m_type == Cube::Type::None) {
                     m_data[index].m_isVisible = false;
                     continue;
                 }
 
                 bool isVisible = false;
-                if (z == 0 || m_data[CoordsToIndex(z - 1, x, y)].m_type == Cube::Type::None) isVisible = true;
-                if (z == Depth - 1 || m_data[CoordsToIndex(z + 1, x, y)].m_type == Cube::Type::None) isVisible = true;
-                if (x == 0 || m_data[CoordsToIndex(z, x - 1, y)].m_type == Cube::Type::None) isVisible = true;
-                if (x == Width - 1 || m_data[CoordsToIndex(z, x + 1, y)].m_type == Cube::Type::None) isVisible = true;
-                if (y == 0 || m_data[CoordsToIndex(z, x, y - 1)].m_type == Cube::Type::None) isVisible = true;
-                if (y == Height - 1 || m_data[CoordsToIndex(z, x, y + 1)].m_type == Cube::Type::None) isVisible = true;
+                if (x == 0 || m_data[CoordsToIndex(x - 1, y, z)].m_type == Cube::Type::None) isVisible = true;
+                if (x == Width - 1 || m_data[CoordsToIndex(x + 1, y, z)].m_type == Cube::Type::None) isVisible = true;
+                if (y == 0 || m_data[CoordsToIndex(x, y - 1, z)].m_type == Cube::Type::None) isVisible = true;
+                if (y == Height - 1 || m_data[CoordsToIndex(x, y + 1, z)].m_type == Cube::Type::None) isVisible = true;
+                if (z == 0 || m_data[CoordsToIndex(x, y, z - 1)].m_type == Cube::Type::None) isVisible = true;
+                if (z == Depth - 1 || m_data[CoordsToIndex(x, y, z + 1)].m_type == Cube::Type::None) isVisible = true;
 
                 m_data[index].m_isVisible = isVisible;
             }
         }
     }
 }
-
-

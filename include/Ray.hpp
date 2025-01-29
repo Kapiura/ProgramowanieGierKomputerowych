@@ -6,7 +6,8 @@ class Ray {
 public:
 	using time_t = float;
 
-	enum class HitType {
+	enum class HitType
+	{
 		Hit,
 		Miss
 	};

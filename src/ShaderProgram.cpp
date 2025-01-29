@@ -140,3 +140,11 @@ void ShaderProgram::setMat4(const std::string_view name,
               << std::endl;
   }
 }
+
+void ShaderProgram::loadFromMemory(const std::string& vertexSource, const std::string& fragmentSource) {
+    vertexShader = createShader(vertexSource.c_str(), GL_VERTEX_SHADER);
+    fragmentShader = createShader(fragmentSource.c_str(), GL_FRAGMENT_SHADER);
+    programId = createProgram(vertexShader, fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+}
