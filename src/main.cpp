@@ -43,7 +43,7 @@ int main() {
   glViewport(0, 0, static_cast<GLsizei>(window.getSize().x),
              static_cast<GLsizei>(window.getSize().y));
 
-  Camera camera(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  Camera camera(glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                 -90.0f, 0.0f);
 
   ShaderProgram shaders;
@@ -101,7 +101,7 @@ int main() {
         for (auto &chunk : chunks) {
 
           glm::vec3 direction = glm::normalize(camera.m_front);
-          hitType = chunk.Hit(Ray(camera.m_position, direction), -6.0f, 6.0f,
+          hitType = chunk.Hit(Ray(camera.m_position, direction), 1.0f, 10.0f,
                               hitRecord);
 
           if (hitType == Ray::HitType::Hit) {
@@ -110,23 +110,17 @@ int main() {
                                 hitRecord.m_cubeIndex.y,
                                 hitRecord.m_cubeIndex.z);
             } else if (event.mouseButton.button == sf::Mouse::Right) {
-              glm::vec3 hitCubeCenter =
-                  glm::vec3(hitRecord.m_cubeIndex) + glm::vec3(0.5f);
+            auto origin = chunk.getOrigin();
+            glm::vec3 hitCubeCenter = glm::vec3(hitRecord.m_cubeIndex) + glm::vec3(0.5f) + glm::vec3(origin.x, origin.y, 0);
+            glm::vec3 direction = glm::normalize(hitCubeCenter - Ray(camera.m_position, camera.m_front).Origin());
+            glm::ivec3 neighborOffset(
+                (direction.x > 0.5f) ? 1 : ((direction.x < -0.5f) ? -1 : 0),
+                (direction.y > 0.5f) ? 1 : ((direction.y < -0.5f) ? -1 : 0),
+                (direction.z > 0.5f) ? 1 : ((direction.z < -0.5f) ? -1 : 0));
 
-              glm::vec3 direction =
-                  glm::normalize(hitCubeCenter - camera.m_position);
+            hitRecord.m_neighbourIndex = hitRecord.m_cubeIndex - neighborOffset;
 
-              glm::ivec3 neighborOffset(
-                  (direction.x > 0.5f) ? 1 : ((direction.x < -0.5f) ? -1 : 0),
-                  (direction.y > 0.5f) ? 1 : ((direction.y < -0.5f) ? -1 : 0),
-                  (direction.z > 0.5f) ? 1 : ((direction.z < -0.5f) ? -1 : 0));
-
-              hitRecord.m_neighbourIndex =
-                  hitRecord.m_cubeIndex + neighborOffset;
-
-              chunk.PlaceBlock(hitRecord.m_neighbourIndex.x,
-                               hitRecord.m_neighbourIndex.y,
-                               hitRecord.m_neighbourIndex.z, Cube::Type::Stone);
+            chunk.PlaceBlock(hitRecord.m_neighbourIndex.x, hitRecord.m_neighbourIndex.y, hitRecord.m_neighbourIndex.z, Cube::Type::Stone);
             }
           }
         }

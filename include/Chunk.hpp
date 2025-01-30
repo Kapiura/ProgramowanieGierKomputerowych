@@ -40,6 +40,7 @@ public:
 
   bool RemoveBlock(uint8_t width, uint8_t height, uint8_t depth);
   bool PlaceBlock(uint8_t width, uint8_t height, uint8_t depth, Cube::Type type);
+  glm::vec2 getOrigin() { return m_origin; };
 
 private:
   size_t CoordsToIndex(size_t depth, size_t width, size_t height) const;
@@ -172,13 +173,15 @@ inline bool Chunk<Depth, Width, Height>::RemoveBlock(uint8_t x, uint8_t y, uint8
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
 inline bool Chunk<Depth, Width, Height>::PlaceBlock(uint8_t x, uint8_t y, uint8_t z, Cube::Type type) {
-    size_t index = CoordsToIndex(x, y, z);
-    if (m_data[index].m_type != Cube::Type::None) {
-        return false;
-    }
-    m_data[index].m_type = type;
-    UpdateVisibility();
-    return true;
+	if (x >= Width || y >= Height || z >= Depth)
+		return false;
+	CubeData &cube = m_data[z * Width * Height + y * Width + x];
+	if (cube.m_type != Cube::Type::None)
+		return false;
+	cube.m_type = type;
+	cube.m_isVisible = true;
+	UpdateVisibility();
+	return true;
 }
 
 template <uint8_t Depth, uint8_t Width, uint8_t Height>
